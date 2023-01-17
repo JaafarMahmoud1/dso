@@ -36,7 +36,7 @@
 #include "IOWrapper/ImageRW.h"
 #include "util/Undistort.h"
 
-
+#include <opencv2/opencv.hpp>
 namespace dso
 {
 
@@ -218,7 +218,6 @@ void PhotometricUndistorter::processFrame(T* image_in, float exposure_time, floa
 	assert(output->w == w && output->h == h);
 	assert(data != 0);
 
-
 	if(!valid || exposure_time <= 0 || setting_photometricCalibration==0) // disable full photometric calibration.
 	{
 		for(int i=0; i<wh;i++)
@@ -230,6 +229,7 @@ void PhotometricUndistorter::processFrame(T* image_in, float exposure_time, floa
 	}
 	else
 	{
+
 		for(int i=0; i<wh;i++)
 		{
 			data[i] = G[image_in[i]];
@@ -244,12 +244,28 @@ void PhotometricUndistorter::processFrame(T* image_in, float exposure_time, floa
 		output->exposure_time = exposure_time;
 		output->timestamp = 0;
 	}
+    static int ii = 0;
+    bool ok = (ii==0) || (ii==1315)||(ii==1851)||
+              (ii==2075)||(ii==2611)||(ii==3467) || (ii==4083);
+    static int k =0;
+    if(ok)
+    {
+        cv::Mat imgShow(h, w, CV_32F, data);
+        cv::Mat imgShow1 = imgShow.clone() ;
+        cv::FileStorage fs;
+        fs.open("/home/jaafar/dev/RoadAR/DSOPP/test/test_data/photometric_calibration/photometrically_corrected_by_dso/"+std::to_string(k)+".bin", cv::FileStorage::WRITE);
+        fs << "data" << imgShow1;
+        fs.release();
+        cv::imwrite("/home/jaafar/dev/RoadAR/DSOPP/test/test_data/photometric_calibration/photometrically_corrected_by_dso/"+std::to_string(k)+".png", imgShow);
+        k++;
+    }
+    ii++;
 
-
-	if(!setting_useExposure)
+    if(!setting_useExposure)
 		output->exposure_time = 1;
 
 }
+
 template void PhotometricUndistorter::processFrame<unsigned char>(unsigned char* image_in, float exposure_time, float factor);
 template void PhotometricUndistorter::processFrame<unsigned short>(unsigned short* image_in, float exposure_time, float factor);
 
