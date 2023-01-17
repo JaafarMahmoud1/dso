@@ -49,7 +49,7 @@
 
 #include "IOWrapper/Pangolin/PangolinDSOViewer.h"
 #include "IOWrapper/OutputWrapper/SampleOutputWrapper.h"
-
+#include <opencv2/opencv.hpp>
 
 std::string vignette = "";
 std::string gammaCalib = "";
